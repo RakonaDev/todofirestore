@@ -5,7 +5,7 @@ import {  Auth, getAuth, GoogleAuthProvider } from "firebase/auth";
 // TODO: Add SDKs for Firebase products that you want to use
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_API_KEY,
+  apiKey: "AIzaSyC8cH4HdIaCl_mXvPrwuvQxTkkVJlZ5M8w",
   authDomain: import.meta.env.VITE_AUTH_DOMAIN,
   projectId: import.meta.env.VITE_PROYECT_ID,
   storageBucket: import.meta.env.VITE_STORAGE_BUCKET,
