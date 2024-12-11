@@ -1,3 +1,4 @@
+import GoogleIcon from "../icons/GoogleIcon"
 import { FeaturesContext } from "../context/FeaturesContext"
 import { useUser } from "../zustand/useUser"
 import { useContext, useState } from "react"
@@ -6,7 +7,10 @@ import { useNavigate } from "react-router"
 export default function LoginForm() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+
   const loginUser = useUser((state) => state.loginUser)
+  const loginGoogle = useUser((state) => state.loginGoogle)
+
   const navigate = useNavigate()
   const { setError, setCargando } = useContext(FeaturesContext)
   
@@ -25,7 +29,7 @@ export default function LoginForm() {
 
   return (
     <>
-      <div className="w-full relative">
+      <div className="w-full relative flex flex-col items-center">
         <form 
           onSubmit={handleSubmit}
           className="flex w-full p-3 flex-col gap-5">
@@ -54,6 +58,14 @@ export default function LoginForm() {
             Inicia Sesión
           </button>
         </form>
+        <button 
+          type="button"
+          className="flex gap-3 bg-white text-black font-bold px-10 my-5 py-2 rounded-lg hover:scale-110 hover:bg-gray-400 transition-all duration-700 mx-auto"
+          onClick={() => loginGoogle(setError, navigate)}
+        >
+          <GoogleIcon />
+          Login with Google
+        </button>
       </div>
     </>
   )

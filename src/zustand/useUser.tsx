@@ -1,6 +1,6 @@
 
-import { authFireBase } from "../credentials";
-import { createUserWithEmailAndPassword, AuthError, signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
+import { authFireBase, providerGoogle } from "../credentials";
+import { createUserWithEmailAndPassword, AuthError, signInWithEmailAndPassword, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from "firebase/auth";
 import { create } from "zustand";
 import { persist } from "zustand/middleware"
 import { NavigateFunction } from "react-router";
@@ -30,6 +30,8 @@ export interface UserActions {
   registerUser: (email: string, password: string, navigate: NavigateFunction) => void
   loginUser: (email: string, password: string, navigate: NavigateFunction, setError: React.Dispatch<React.SetStateAction<IError>>, setCargando: React.Dispatch<React.SetStateAction<ICargando>>) => void
   authUser: (navigate: NavigateFunction) => void
+  loginGoogle: (setError: React.Dispatch<React.SetStateAction<IError>>, navigate: NavigateFunction) => void
+  cerrarSesion: (setError: React.Dispatch<React.SetStateAction<IError>>, navigate: NavigateFunction) => void
 }
 
 export const useUser = create<UserState & Token & UserActions>()(
@@ -104,11 +106,42 @@ export const useUser = create<UserState & Token & UserActions>()(
             set({ user })
           }
           else {
-            navigate('/login')
+            navigate('/')
           }
         })
-      }
+      },
 
+      loginGoogle: (setError: React.Dispatch<React.SetStateAction<IError>>, navigate: NavigateFunction) => {
+        signInWithPopup(authFireBase, providerGoogle)
+          .then((userCrendentials) => {
+            const credential = GoogleAuthProvider.credentialFromResult(userCrendentials)
+            const token = credential?.accessToken
+            const user = userCrendentials.user
+            set({ token, user })
+            navigate('/home')
+          })
+          .catch((error: AuthError) => {
+            console.error(error.message)
+            setError({
+              estado: true,
+              mensajeError: 'Error al iniciar sesión con Google'
+            })
+          })
+      },
+
+      cerrarSesion: (setError: React.Dispatch<React.SetStateAction<IError>>, navigate: NavigateFunction) => {
+        signOut(authFireBase)
+          .then(() => {
+            navigate('/')
+          })
+          .catch((error: AuthError) => {
+            console.error(error.message)
+            setError({
+              estado: true,
+              mensajeError: 'Error al cerrar sesión'
+            })
+          })
+      },
     }),
     {
       name: "user",

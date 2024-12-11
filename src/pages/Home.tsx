@@ -7,6 +7,8 @@ import { useNavigate } from "react-router"
 import { AnimatePresence, motion } from "motion/react"
 import { FeaturesContext } from "../context/FeaturesContext"
 
+import Exit from '../assets/exit.svg'
+
 export function Home() {
 
   const { nombreTarea, setNombreTarea, descripcionTarea, setDescripcionTarea, id, actualizar, setActualizar } = useContext(TodoNameContext)
@@ -16,6 +18,8 @@ export function Home() {
 
   const authUser = useUser((state) => state.authUser)
   const uid = useUser((state) => state.user.uid)
+  const cerrarSesion = useUser((state) => state.cerrarSesion)
+
   const añadirTarea = useTodo((state) => state.añadirTarea)
   const recibirTareas = useTodo((state) => state.recibirTareas)
   const actualizarTarea = useTodo((state) => state.actualizarTarea)
@@ -53,7 +57,14 @@ export function Home() {
 
   return (
     <>
-      <h1 className='text-center pt-20 text-4xl font-bold'>Añadir una tarea</h1>
+      <div 
+        className="absolute top-5 right-5 h-10 cursor-pointer text-white flex gap-2 items-center hover:scale-105 transition-all duration-500" 
+        onClick={() =>cerrarSesion(setError, navigate)}
+      >
+        <img src={Exit} alt="Exit" className="w-10 h-10" />
+        <p className="text-white text-xl font-bold pb-0">Cerrar Sesión</p>
+      </div>
+      <h1 className='text-center pt-24 text-4xl font-bold'>Añadir una tarea</h1>
 
       <main className="mt-8 w-full flex justify-center pb-10 h-fit">
         <div className="max-w-[50rem] w-full">
