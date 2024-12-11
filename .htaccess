@@ -1,0 +1,7 @@
+# Activa el motor de reescritura
+RewriteEngine On
+
+# Redirige todas las solicitudes a index.html o index.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.html [L]
