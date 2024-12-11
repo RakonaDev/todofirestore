@@ -10,16 +10,17 @@ import ErrorPage from './pages/ErrorPage'
 import AlertErrorCard from './components/AlertErrorCard'
 import TodoNameProvider from './context/TodoNameProvider'
 import { AnimatePresence, motion } from 'motion/react'
+import CargandoCard from './components/CargandoCard'
 
 function App() {
-  const { error } = useContext(FeaturesContext)
+  const { error, cargando } = useContext(FeaturesContext)
 
   return (
     <>
       <AnimatePresence mode='popLayout'>
-      {error ?
+      {error.estado ?
           <motion.div
-            key={"error"}
+            key="error"
             initial={{ opacity: 0, y: -50, scale: 0.5 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -50, scale: 0.5 }}
@@ -30,8 +31,23 @@ function App() {
             <AlertErrorCard />
           </motion.div>
         :
-        <></>
+        <motion.div key="empty-error" />
       }
+      {cargando.estado ?
+        <motion.div
+          key="cargando"
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 50 }}
+          transition={{ duration: 0.45 }}
+          layout
+        >
+          <CargandoCard />
+        </motion.div>
+        :
+        <motion.div key="empty-cargando" />
+      }
+
       </AnimatePresence>
       <img src={LoboLogo} alt="Logo" className="w-16 h-16 mb-10 absolute top-5 left-5" />
       <Routes>

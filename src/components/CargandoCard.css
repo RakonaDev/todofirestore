@@ -1,0 +1,14 @@
+.rueda {
+  border: 0.5em solid #fff;
+  border-top: 0.5em solid transparent;
+  border-radius: 50%;
+  width: 2em;
+  height: 2em;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  100% {
+    transform: rotate(360deg);
+  }
+}

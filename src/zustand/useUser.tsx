@@ -5,6 +5,8 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware"
 import { NavigateFunction } from "react-router";
 import React from "react";
+import { ICargando } from "@/models/Cargando.model";
+import { IError } from "@/models/Error.mode";
 
 export interface User {
   displayName: string | null,
@@ -26,7 +28,7 @@ export interface UserState {
 
 export interface UserActions {
   registerUser: (email: string, password: string, navigate: NavigateFunction) => void
-  loginUser: (email: string, password: string, navigate: NavigateFunction, setError: React.Dispatch<React.SetStateAction<boolean>>, setMensajeError: React.Dispatch<React.SetStateAction<string>>) => void
+  loginUser: (email: string, password: string, navigate: NavigateFunction, setError: React.Dispatch<React.SetStateAction<IError>>, setCargando: React.Dispatch<React.SetStateAction<ICargando>>) => void
   authUser: (navigate: NavigateFunction) => void
 }
 
@@ -59,7 +61,11 @@ export const useUser = create<UserState & Token & UserActions>()(
             console.log(error.message)
           })
       },
-      loginUser: (email: string, password: string, navigate: NavigateFunction, setError: React.Dispatch<React.SetStateAction<boolean>>, setMensajeError: React.Dispatch<React.SetStateAction<string>>) => {
+      loginUser: (email: string, password: string, navigate: NavigateFunction, setError: React.Dispatch<React.SetStateAction<IError>>, setCargando: React.Dispatch<React.SetStateAction<ICargando>>) => {
+        setCargando({
+          estado: true,
+          mensajeCargando: 'Iniciando sesión...'
+        })
         signInWithEmailAndPassword(authFireBase, email, password)
           .then((userCredential) => {
             const user = userCredential.user
@@ -70,14 +76,25 @@ export const useUser = create<UserState & Token & UserActions>()(
             navigate('/home')
           })
           .catch((error: AuthError) => {
-            setMensajeError('Credenciales incorrectas. Intentelo denuevo!')
-            setError(true)
+            setError({
+              estado: true,
+              mensajeError: 'Credenciales incorrectas. Intentelo denuevo!'
+            })
             console.error(error.message)
 
             // Desaparezca el mensaje de error despues de 5 segundos
             setTimeout(() => {
-              setError(false)
+              setError({
+                estado: false,
+                mensajeError: ''
+              })
             }, 5000)
+          })
+          .finally(() => {
+            setCargando({
+              estado: false,
+              mensajeCargando: ''
+            })
           })
       },
 

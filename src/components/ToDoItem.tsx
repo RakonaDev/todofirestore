@@ -3,6 +3,7 @@ import { useTodo } from "../zustand/useToDo";
 import './ToDoItem.css'
 import { useContext } from "react";
 import { TodoNameContext } from "../context/TodoNameContext";
+import { FeaturesContext } from "../context/FeaturesContext";
 
 
 export function ToDoItem({ id, nombreTarea, descripcionTarea, estado }: ToDo) {
@@ -10,6 +11,7 @@ export function ToDoItem({ id, nombreTarea, descripcionTarea, estado }: ToDo) {
   const resolverTarea = useTodo((state) => state.resolverTarea)
 
   const { setActualizar, setNombreTarea, setDescripcionTarea, setId } = useContext(TodoNameContext)	
+  const { setCargando, setError } = useContext(FeaturesContext)
   
   const actualizarTarea = () => {
     setActualizar(true)
@@ -49,7 +51,7 @@ export function ToDoItem({ id, nombreTarea, descripcionTarea, estado }: ToDo) {
         <button
           type="button"
           className="flex gap-3 items-center px-6 py-2 rounded-md bg-red-600 text-white text-lg transition-colors duration-500 hover:bg-red-800"
-          onClick={() => eliminarTarea(id)}
+          onClick={() => eliminarTarea(id, setCargando, setError)}
         >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" width="24" height="24" strokeWidth="2">
             <path d="M4 7l16 0"></path>

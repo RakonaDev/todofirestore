@@ -8,11 +8,11 @@ export default function LoginForm() {
   const [password, setPassword] = useState("")
   const loginUser = useUser((state) => state.loginUser)
   const navigate = useNavigate()
-  const { setError, setMensajeError } = useContext(FeaturesContext)
+  const { setError, setCargando } = useContext(FeaturesContext)
   
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    loginUser(email, password, navigate, setError, setMensajeError)
+    loginUser(email, password, navigate, setError, setCargando)
   }
 
   const handleEmail = (e: React.ChangeEvent<HTMLInputElement>) => {

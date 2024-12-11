@@ -5,13 +5,13 @@ import { useUser } from "../zustand/useUser"
 import { useContext, useEffect, useState } from "react"
 import { useNavigate } from "react-router"
 import { AnimatePresence, motion } from "motion/react"
+import { FeaturesContext } from "../context/FeaturesContext"
 
 export function Home() {
 
   const { nombreTarea, setNombreTarea, descripcionTarea, setDescripcionTarea, id, actualizar, setActualizar } = useContext(TodoNameContext)
+  const { setError, setCargando, cargando, error } = useContext(FeaturesContext)
 
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(false)
   const [estado] = useState(false)
 
   const authUser = useUser((state) => state.authUser)
@@ -31,7 +31,7 @@ export function Home() {
 
   const submitTarea = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    añadirTarea(nombreTarea, descripcionTarea, estado, uid)
+    añadirTarea(nombreTarea, descripcionTarea, estado, uid, setError, setCargando)
     setNombreTarea("")
     setDescripcionTarea("")
   }
@@ -46,14 +46,14 @@ export function Home() {
 
   useEffect(() => {
     authUser(navigate)
-    recibirTareas(uid, setLoading, setError)
+    recibirTareas(uid, setCargando, setError)
     console.log(tareas)
   }, [])
   const tareas = useTodo((state) => state.tareas)
 
   return (
     <>
-      <h1 className='text-center mt-24 text-4xl font-bold'>Añadir una tarea</h1>
+      <h1 className='text-center pt-20 text-4xl font-bold'>Añadir una tarea</h1>
 
       <main className="mt-8 w-full flex justify-center pb-10 h-fit">
         <div className="max-w-[50rem] w-full">
@@ -95,48 +95,48 @@ export function Home() {
               className="mx-auto w-fit bg-blue-600 px-4 py-2 rounded-lg transition-colors duration-500 hover:bg-blue-400 cursor-pointer"
             />
           </form>
-          <AnimatePresence mode="popLayout">
-            <motion.div 
-              layout 
-              className="mt-8 w-full bg-white text-black p-5 rounded-lg min-h-40"
-              transition={{ duration: 0.4 }}
-            >
-              <motion.h1 
-                className="text-center text-4xl font-bold pb-5"
-                transition={{ duration: 1 }}
-                key={"h1"}
+          <div className="relative">
+            <AnimatePresence mode="popLayout">
+              <div className="mt-8 w-full flex justify-center pt-5 pb-3 h-22 bg-white text-black rounded-t-lg relative">
+                <motion.h1
+                  className="text-center text-4xl font-bold pb-5"
+                  animate={{opacity: 1}}
+                >
+                  Tareas
+                </motion.h1>
+              </div>
+              <motion.div
+                layout
+                className="w-full bg-white text-black p-5 rounded-b-lg relative overflow-hidden"
+                transition={{ duration: 0.3 }}
               >
-                Tareas
-              </motion.h1>
-              {loading ? <><h1 className="text-center text-2xl">Cargando tus tareas</h1></> : <></>}
-              {error ? <><h1 className="text-center text-2xl">Error</h1></> : <></>}
-
-              {!loading && !error && tareas.length != 0 ?
-                tareas.map((tarea) => (
-                  <motion.li 
-                    key={tarea.id}
-                    initial={{ opacity: 0, y: 50 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -50 }}
-                    transition={{ duration: 0.5, type: 'spring' }}
-                    layout
-                  >
-                    <ToDoItem
+                <AnimatePresence mode="popLayout">
+                {tareas.length != 0 ?
+                  tareas.map((tarea) => (
+                    <motion.li
                       key={tarea.id}
-                      id={tarea.id}
-                      nombreTarea={tarea.nombreTarea}
-                      descripcionTarea={tarea.descripcionTarea}
-                      estado={tarea.estado}
-                    />
-                  </motion.li>
-                ))
-                :
-                <></>
-              }
-
-              {!loading && tareas.length == 0 && !error ? <><h1 className="text-center text-xl">No hay tareas</h1></> : <></>}
-            </motion.div>
-          </AnimatePresence>
+                      initial={{ opacity: 0, y: -50 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -50, zIndex: -10 }}
+                      transition={{ duration: 0.4 }}
+                      layout
+                    >
+                      <ToDoItem
+                        id={tarea.id}
+                        nombreTarea={tarea.nombreTarea}
+                        descripcionTarea={tarea.descripcionTarea}
+                        estado={tarea.estado}
+                      />
+                    </motion.li>
+                  ))
+                  :
+                  <motion.div key="empty-list" />
+                }
+                </AnimatePresence>
+              </motion.div>
+              {!cargando.estado && tareas.length == 0 && !error.estado ? <h1 className="text-center text-xl absolute bottom-5 w-full text-black z-40">No hay tareas</h1> : <motion.div key="empty-h1" />}
+            </AnimatePresence>
+          </div>
         </div>
       </main>
     </>

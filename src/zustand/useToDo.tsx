@@ -2,6 +2,8 @@ import { ToDo } from "@/models/ToDo.model";
 import { addTodo, deleteTodo, getTodo, updateNameTodo, updateTodo } from "../services/serviceToDo";
 import { create } from "zustand";
 import { Dispatch, SetStateAction } from "react";
+import { ICargando } from "@/models/Cargando.model";
+import { IError } from "@/models/Error.mode";
 
 
 export interface ToDoState {
@@ -10,11 +12,11 @@ export interface ToDoState {
 }
 
 export interface ToDoActions {
-  añadirTarea: (nombreTarea: string, descripcionTarea: string, estado: boolean, uid: string | null) => void
-  recibirTareas: (uid: string | null, setLoading: Dispatch<SetStateAction<boolean>>, setError: Dispatch<SetStateAction<boolean>>) => void
-  eliminarTarea: (id: string) => void
+  añadirTarea: (nombreTarea: string, descripcionTarea: string, estado: boolean, uid: string | null, setError: React.Dispatch<React.SetStateAction<IError>>, setCargando: React.Dispatch<React.SetStateAction<ICargando>>) => void
+  recibirTareas: (uid: string | null, setCargando: Dispatch<SetStateAction<ICargando>>, setError: Dispatch<SetStateAction<IError>>) => void
+  eliminarTarea: (id: string, setCargando: Dispatch<SetStateAction<ICargando>>, setError: Dispatch<SetStateAction<IError>>) => void
   resolverTarea: (id: string, estado: boolean) => void
-  actualizarTarea: (id: string, nombreTarea: string, descripcionTarea: string, setError: Dispatch<SetStateAction<boolean>>) => void
+  actualizarTarea: (id: string, nombreTarea: string, descripcionTarea: string, setError: Dispatch<SetStateAction<IError>>) => void
 }
 
 export const useTodo = create<ToDoState & ToDoActions>()(
@@ -23,7 +25,11 @@ export const useTodo = create<ToDoState & ToDoActions>()(
     return {
       tareas: [],
       realizando: false,
-      añadirTarea: async (nombreTarea: string, descripcionTarea: string, estado: boolean, uid: string | null) => {
+      añadirTarea: async (nombreTarea: string, descripcionTarea: string, estado: boolean, uid: string | null, setError: React.Dispatch<React.SetStateAction<IError>>, setCargando: React.Dispatch<React.SetStateAction<ICargando>> ) => {
+        setCargando({
+          estado: true,
+          mensajeCargando: 'Añadiendo la tarea'
+        })
         try {
           const docRef = await addTodo(nombreTarea, descripcionTarea, estado, uid)
           const tarea: ToDo = {
@@ -40,11 +46,25 @@ export const useTodo = create<ToDoState & ToDoActions>()(
             }
           ))
         }
-        catch (error) {
+        catch (error: Error | unknown ) {
           console.error(error)
+          setError({
+            estado: true,
+            mensajeError: 'Error al añadir la tarea'
+          })
+        }
+        finally {
+          setCargando({
+            estado: false,
+            mensajeCargando: ''
+          })
         }
       },
-      recibirTareas: async (uid: string | null, setLoading: Dispatch<SetStateAction<boolean>>, setError: Dispatch<SetStateAction<boolean>>) => {
+      recibirTareas: async (uid: string | null, setCargando: Dispatch<SetStateAction<ICargando>>, setError: Dispatch<SetStateAction<IError>>) => {
+        setCargando({
+          estado: true,
+          mensajeCargando: 'Cargando tus tareas'
+        })
         try {
           /*throw new Error("Error")*/
           const tareas: Array<ToDo> = []
@@ -63,22 +83,42 @@ export const useTodo = create<ToDoState & ToDoActions>()(
         }
         catch (error) {
           console.error(error)
-          setError(true)
+          setError({
+            estado: true,
+            mensajeError: 'Error al recibir tus tareas'
+          })
         }
         finally {
-          setLoading(false)
+          setCargando({
+            estado: false,
+            mensajeCargando: ''
+          })
         }
       },
-      eliminarTarea: async (id: string) => {
+      eliminarTarea: async (id: string, setCargando: Dispatch<SetStateAction<ICargando>>, setError: Dispatch<SetStateAction<IError>>) => {
+        setCargando({
+          estado: true,
+          mensajeCargando: 'Eliminando tarea...'
+        })
         try {
-          await deleteTodo(id)
           set((state: ToDoState & ToDoActions) => ({
             ...state,
-            tareas: state.tareas.filter((tarea) => tarea.id !== id)
+            tareas: state.tareas.filter((tarea) => tarea.id !== id),
           }))
+          await deleteTodo(id)
         }
         catch (error) {
           console.error(error)
+          setError({
+            estado: true,
+            mensajeError: 'Error al eliminar la tarea'
+          })
+        }
+        finally {
+          setCargando({
+            estado: false,
+            mensajeCargando: ''
+          })
         }
       },
       resolverTarea: (id: string, estado: boolean) => {
@@ -102,7 +142,7 @@ export const useTodo = create<ToDoState & ToDoActions>()(
           }
         }, 7000);
       },
-      actualizarTarea: async (id: string, nombreTarea: string, descripcionTarea: string, setError: Dispatch<SetStateAction<boolean>>) => {
+      actualizarTarea: async (id: string, nombreTarea: string, descripcionTarea: string, setError: Dispatch<SetStateAction<IError>>) => {
         set((state) => ({
           ...state,
           tareas: state.tareas.map((tarea) =>
@@ -115,7 +155,10 @@ export const useTodo = create<ToDoState & ToDoActions>()(
         }
         catch (error) {
           console.error(error)
-          setError(true)
+          setError({
+            estado: true,
+            mensajeError: 'Error al actualizar la tarea'
+          })
         }
       }
     }
